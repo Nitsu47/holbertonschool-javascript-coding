@@ -16,6 +16,6 @@ request.get(url, (err, response, body) => {
       return;
     }
     console.log(`Successfully wrote webpage content to ${filePath}`);
-    console.log(body.trim());
   });
+  console.log(body.trim());
 });
