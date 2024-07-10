@@ -3,14 +3,14 @@ const { countStudents } = require('./3-read_file_async');
 
 const app = http.createServer(async (req, res) => {
   res.setHeader('Content-Type', 'text/plain');
-  
+
   if (req.url === '/') {
     res.end('Hello Holberton School!');
   } else if (req.url === '/students') {
     try {
       const studentData = await countStudents('database.csv');
-      res.write('This is the list of our students\n');
-      res.end(studentData);
+      res.write(`This is the list of our students\n${studentData}`);
+      res.end();
     } catch (error) {
       console.error('Error retrieving student data:', error);
       res.statusCode = 500;
