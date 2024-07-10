@@ -1,21 +1,52 @@
+/* eslint-disable */
 const http = require('http');
-const countStudents = require('./3-read_file_async');
+const url = require('url');
+const fs = require('fs').promises;
 
-const app = http.createServer((req, res) => {
-  res.setHeader('Content-Type', 'text/plain');
-  if (req.url === '/') {
+async function countStudents(path) {
+  try {
+    const data = await fs.readFile(path, 'utf8');
+    const rows = data.split('\n').filter((row) => row);
+    const headers = rows.shift().split(',');
+    const fieldIndex = headers.indexOf('field');
+    const firstNameIndex = headers.indexOf('firstname');
+    const fields = [...new Set(rows.map((row) => row.split(',')[fieldIndex]))];
+
+    let result = `Number of students: ${rows.length}\n`;
+
+    fields.forEach((field) => {
+      const students = rows.filter((row) => row.split(',')[fieldIndex] === field);
+      result += `Number of students in ${field}: ${students.length}. List: ${students.map((student) => student.split(',')[firstNameIndex]).join(', ')}\n`;
+    });
+
+    return result;
+  } catch {
+    throw new Error('Cannot load the database');
+  }
+}
+
+const app = http.createServer(async (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  const path = url.parse(req.url, true).pathname;
+
+  if (path === '/') {
     res.end('Hello Holberton School!');
-  } else if (req.url === '/students') {
+  } else if (path === '/students') {
     res.write('This is the list of our students\n');
-    res.end('Number of students: 10\n' +
-            'Number of students in CS: 6. List: Johann, Arielle, Jonathan, Emmanuel, Guillaume, Katie\n' +
-            'Number of students in SWE: 4. List: Guillaume, Joseph, Paul, Tommy');
+    try {
+      const data = await countStudents(process.argv[2]);
+      res.end(data);
+    } catch (error) {
+      res.end(error.message);
+    }
   } else {
-    res.statusCode = 404;
-    res.end('404 Not Found');
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
   }
 });
 
-app.listen(1245);
+app.listen(1245, () => {
+  console.log('Server listening on port 1245');
+});
 
 module.exports = app;
