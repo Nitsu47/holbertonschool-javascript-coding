@@ -1,5 +1,4 @@
 #!/usr/bin/node
-
 const request = require('request');
 
 request.get(process.argv[2], (error, response) => {
@@ -7,6 +6,5 @@ request.get(process.argv[2], (error, response) => {
     console.error(error);
     return;
   }
-
   console.log(`code: ${response.statusCode}`);
 });
