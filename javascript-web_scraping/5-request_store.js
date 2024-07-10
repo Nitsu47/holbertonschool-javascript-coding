@@ -1,21 +1,18 @@
 #!/usr/bin/node
 const request = require('request');
-const fs = require('fs');
+const apiUrl = process.argv[2];
 
-const url = process.argv[2];
-const filePath = process.argv[3];
-
-request.get(url, (err, response, body) => {
-  if (err) {
-    console.error('Error fetching webpage:', err);
-    return;
+request(apiUrl, (error, response, body) => {
+  if (error) {
+    throw error;
   }
-  fs.writeFile(filePath, body, 'utf8', (err) => {
-    if (err) {
-      console.error('Error writing file:', err);
-      return;
+  const toComplete = JSON.parse(body);
+  const completedTasksByUser = {};
+
+  toComplete.forEach((tasks) => {
+    if (tasks.completed) {
+      completedTasksByUser[tasks.userId] = (completedTasksByUser[tasks.userId] || 0) + 1;
     }
-    console.log(`Successfully wrote webpage content to ${filePath}`);
   });
-  console.log(body.trim());
+  console.log(completedTasksByUser);
 });
