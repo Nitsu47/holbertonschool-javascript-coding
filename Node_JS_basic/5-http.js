@@ -1,15 +1,21 @@
 const http = require('http');
+const { countStudents } = require('./3-read_file_async');
 
-const app = http.createServer((req, res) => {
+const app = http.createServer(async (req, res) => {
   res.setHeader('Content-Type', 'text/plain');
   
   if (req.url === '/') {
     res.end('Hello Holberton School!');
   } else if (req.url === '/students') {
-    res.write('This is the list of our students\n');
-    res.end('Number of students: 10\n' +
-      'Number of students in CS: 6. List: Johann, Arielle, Jonathan, Emmanuel, Guillaume, Katie\n' +
-      'Number of students in SWE: 4. List: Guillaume, Joseph, Paul, Tommy');
+    try {
+      const studentData = await countStudents('database.csv');
+      res.write('This is the list of our students\n');
+      res.end(studentData);
+    } catch (error) {
+      console.error('Error retrieving student data:', error);
+      res.statusCode = 500;
+      res.end('Error retrieving student data');
+    }
   } else {
     res.statusCode = 404;
     res.end('404 Not Found');
